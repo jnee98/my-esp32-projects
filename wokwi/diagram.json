@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "author": "jnee98",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 60, "left": 60, "attrs": {} },
+    { "type": "wokwi-hc-sr04", "id": "sensor", "top": 120, "left": -60, "attrs": {} },
+    { "type": "wokwi-ssd1306", "id": "oled", "top": 120, "left": 240, "attrs": { "size": "128x64" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "" ],
+    [ "esp:RX", "$serialMonitor:TX", "" ],
+    [ "esp:GND.1", "sensor:GND", "black" ],
+    [ "esp:5V", "sensor:VCC", "red" ],
+    [ "esp:4", "sensor:TRIG", "green" ],
+    [ "esp:5", "sensor:ECHO", "yellow" ],
+    [ "esp:GND.2", "oled:GND", "black" ],
+    [ "esp:3V3", "oled:VCC", "red" ],
+    [ "esp:21", "oled:SDA", "blue" ],
+    [ "esp:22", "oled:SCL", "yellow" ]
+  ],
+  "dependencies": {}
+}
