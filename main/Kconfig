@@ -1,0 +1,63 @@
+# Water Level Monitor Configuration
+
+menu "Water Level Monitor Configuration"
+
+config TANK_HEIGHT_FT
+    float "Tank height in feet"
+    default 55.0
+    help
+        Height of the water tank in feet.
+        This is used to calculate water depth from the air gap measurement.
+        Common values: 55ft (standard), 20ft, 30ft, 40ft, etc.
+
+config TANK_HEIGHT_CM
+    int "Tank height in centimeters (auto-calculated from feet if 0)"
+    default 0
+    help
+        Height of the water tank in centimeters.
+        If set to 0 (default), it will be calculated from TANK_HEIGHT_FT * 30.48.
+        Set this manually if you want exact cm value without floating point conversion.
+
+config SENSOR_TO_DATUM_CM
+    float "Default sensor-to-datum distance (cm)"
+    default 0.0
+    help
+        Distance from sensor face to tank bottom in cm.
+        0.0 = uncalibrated (will show UNCALIBRATED on display).
+        Can be overridden at runtime via serial command 'd <cm>'.
+
+config REAL_DATA_BUFFER_SIZE
+    int "Real data buffer size (number of samples)"
+    default 1000
+    range 100 5000
+    help
+        Number of data points to store for real data playback mode.
+        Each point is a float (4 bytes). 1000 points = ~4KB RAM.
+
+config REAL_DATA_INTERVAL_MS
+    int "Real data playback interval (ms)"
+    default 100
+    range 10 10000
+    help
+        Time between each real data sample during playback.
+
+config WIFI_SSID
+    string "WiFi SSID"
+    default "Wokwi-GUEST"
+    help
+        WiFi network SSID to connect to.
+        Use "Wokwi-GUEST" for Wokwi simulation (open network).
+
+config WIFI_PASS
+    string "WiFi Password"
+    default ""
+    help
+        WiFi network password. Leave empty for open networks.
+
+config WEB_SERVER_PORT
+    int "Web server port"
+    default 80
+    help
+        HTTP server port for REST API and WebSocket.
+
+endmenu

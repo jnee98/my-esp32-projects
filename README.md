@@ -269,20 +269,64 @@ ws.send('stop_real_data');
 
 ---
 
-## 📊 Tank Configuration
+## 📊 Tank Configuration (User Configurable)
 
-| Parameter | Value |
-|-----------|-------|
-| **Tank Height** | 55 ft (1676.4 cm) |
-| **Sensor Max Range** | ~400 cm (HC-SR04 limit) |
-| **Datum Range** | 0 - 1676.4 cm |
-| **Real Data Buffer** | 1000 points |
+All tank and system settings can be configured **without editing code** via ESP-IDF's menuconfig:
+
+```bash
+idf.py menuconfig
+# Navigate to: Water Level Monitor Configuration
+```
+
+| Setting | Kconfig Option | Default | Description |
+|---------|----------------|---------|-------------|
+| Tank Height (feet) | `CONFIG_TANK_HEIGHT_FT` | 55.0 | Height in feet (e.g., 20, 30, 55, 100) |
+| Tank Height (cm) | `CONFIG_TANK_HEIGHT_CM` | 0 (auto) | Exact cm value; 0 = auto-calc from feet |
+| Sensor-to-Datum (cm) | `CONFIG_SENSOR_TO_DATUM_CM` | 0.0 | Default calibration; 0 = uncalibrated |
+| Real Data Buffer | `CONFIG_REAL_DATA_BUFFER_SIZE` | 1000 | Samples (100-5000, ~4KB per 1000) |
+| Playback Interval | `CONFIG_REAL_DATA_INTERVAL_MS` | 100 | ms between samples (10-10000) |
+| WiFi SSID | `CONFIG_WIFI_SSID` | "Wokwi-GUEST" | Network to connect |
+| WiFi Password | `CONFIG_WIFI_PASS` | "" | Leave empty for open |
+| Web Server Port | `CONFIG_WEB_SERVER_PORT` | 80 | HTTP/WebSocket port |
+
+### Quick Examples
+
+**20ft tank (609.6 cm):**
+```bash
+idf.py menuconfig
+# Set: Tank height in feet = 20
+```
+
+**Exact 500cm tank:**
+```bash
+idf.py menuconfig
+# Set: Tank height in feet = 0
+# Set: Tank height in centimeters = 500
+```
+
+**Pre-calibrated sensor at 150cm:**
+```bash
+idf.py menuconfig
+# Set: Default sensor-to-datum distance = 150.0
+```
+
+**Larger buffer for 5-minute playback:**
+```bash
+idf.py menuconfig
+# Set: Real data buffer size = 3000
+# Set: Playback interval = 100
+# Total: 300 seconds (5 minutes)
+```
+
+> **Note**: After changing menuconfig, run `idf.py build` to apply.
 
 ---
 
 ## ✨ Features
 
-- **55ft (1676.4cm) tank** support
+- **User-configurable tank height** (feet or cm) via `menuconfig`
+- **Configurable real data buffer** size and playback speed
+- **Configurable WiFi credentials** and web server port
 - **Median filtering** (5 samples) for noise rejection
 - **Precise pulse measurement**: RMT hardware (ESP-IDF) / `pulseIn()` (Arduino)
 - **SSD1306 OLED** driver with custom 5x7 font
