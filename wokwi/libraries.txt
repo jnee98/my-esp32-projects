@@ -1,0 +1,4 @@
+WebSockets@2.6.1
+ArduinoJson
+Adafruit SSD1306
+Adafruit GFX Library

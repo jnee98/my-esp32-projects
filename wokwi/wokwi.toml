@@ -1,0 +1,43 @@
+[wokwi]
+version = 1
+
+[[wokwi.chip]]
+name = "esp32"
+
+# Auto-detected from #include:
+# Adafruit GFX Library
+# Adafruit SSD1306
+
+# Manual libraries (not auto-detected):
+[[wokwi.libs]]
+name = "WebSockets"
+version = "2.6.1"
+
+[[wokwi.libs]]
+name = "ArduinoJson"
+
+[[wokwi.parts]]
+type = "board-esp32-devkit-c-v4"
+id = "esp"
+
+[[wokwi.parts]]
+type = "hc-sr04"
+id = "ultrasonic"
+[ultrasonic.connections]
+trig = "esp.5"
+echo = "esp.18"
+vcc = "esp.3v3"
+gnd = "esp.gnd"
+
+[[wokwi.parts]]
+type = "ssd1306"
+id = "oled"
+[oled.connections]
+sda = "esp.21"
+scl = "esp.22"
+vcc = "esp.3v3"
+gnd = "esp.gnd"
+
+[[wokwi.parts]]
+type = "wokwi-wifi"
+id = "wifi"
