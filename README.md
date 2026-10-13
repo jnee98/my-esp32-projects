@@ -77,7 +77,7 @@ idf.py -p /dev/ttyUSB0 flash monitor
 
 ---
 
-## 📋 Serial Commands (Both Versions)
+## 📋 Serial Commands (ESP-IDF Version)
 
 | Command | Description |
 |---------|-------------|
@@ -86,6 +86,85 @@ idf.py -p /dev/ttyUSB0 flash monitor
 | `d <cm>` | Set datum distance (e.g., `d 150.5`) |
 | `r` / `reset` | Clear calibration |
 | `s` / `single` | Take single reading |
+| `m <mode>` | Set operation mode (0-5) |
+| `load_real_data` | Enable real data playback mode |
+| `stop_real_data` | Stop real data, return to live sensor |
+| `real_data <idx> <val>` | Set real data point (e.g., `real_data 0 150.5`) |
+| `dump_real_data` | Dump all real data buffer points |
+
+### Operation Modes (`m <mode>`)
+| Mode | Value | Description |
+|------|-------|-------------|
+| **MODE_LIVE_SENSOR** | 0 | Live HC-SR04 readings (default) |
+| **MODE_SINE_WAVE** | 1 | Sine wave simulation (0-500cm) |
+| **MODE_SQUARE_WAVE** | 2 | Square wave simulation |
+| **MODE_TRIANGLE_WAVE** | 3 | Triangle wave simulation |
+| **MODE_SAWTOOTH_WAVE** | 4 | Sawtooth wave simulation |
+| **MODE_REAL_DATA** | 5 | Playback from real data buffer |
+
+---
+
+## 🌐 Network Features (ESP-IDF Version Only)
+
+### WiFi
+- **SSID**: `Wokwi-GUEST` (open network for Wokwi simulation)
+- **Mode**: Station (STA)
+- **Auto-reconnect**: Up to 10 retries on disconnect
+
+### HTTP REST API (Port 80)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/realtime` | GET | Get current sensor reading (JSON) |
+| `/realtime` | POST | Load real data points (JSON array `[v1,v2,...]`) |
+| `/realtime/stop` | POST | Stop real data playback, return to live sensor |
+| `/tank/height` | GET | Get tank dimensions (ft & cm) |
+| `/realtime/buffer` | GET | Dump entire real data buffer |
+
+#### GET `/realtime` Response
+```json
+{
+  "air_gap_cm": 123.4,
+  "water_depth_cm": 1553.0,
+  "valid": true,
+  "calibrated": true,
+  "mode": 0,
+  "tank_height_cm": 1676.4,
+  "timestamp": 1234567890
+}
+```
+
+#### POST `/realtime` Request
+```json
+[150.0, 151.2, 149.8, 150.5, 152.1]
+```
+- Loads up to 1000 data points
+- Automatically switches to **MODE_REAL_DATA**
+
+### WebSocket Server
+
+| URI | Protocol | Description |
+|-----|----------|-------------|
+| `/ws` | WebSocket | Real-time sensor data stream (100ms interval) |
+
+#### WebSocket Messages (Server → Client)
+```json
+{
+  "air_gap_cm": 123.4,
+  "water_depth_cm": 1553.0,
+  "valid": true,
+  "calibrated": true,
+  "mode": 5,
+  "real_data_index": 42,
+  "timestamp": 1234567890
+}
+```
+
+#### WebSocket Commands (Client → Server)
+| Command | Description |
+|---------|-------------|
+| `load_real_data` | Start real data playback |
+| `stop_real_data` | Stop real data, return to live sensor |
 
 ---
 
@@ -101,13 +180,63 @@ Display will now show **Water Depth** instead of **UNCALIBRATED**.
 
 ---
 
+## 📦 Real Data Simulation (ESP-IDF Version)
+
+The ESP-IDF version supports a **1000-point real data buffer** for testing without physical water:
+
+### Loading Real Data via HTTP
+```bash
+# Load array of distances (air gap in cm)
+curl -X POST http://<ESP_IP>/realtime   -H "Content-Type: application/json"   -d '[150.0, 149.5, 148.0, 147.2, 146.8]'
+```
+
+### Loading Real Data via WebSocket
+```javascript
+ws.send('load_real_data');
+```
+
+### Loading Real Data via Serial
+```
+real_data 0 150.0
+real_data 1 149.5
+...
+load_real_data
+```
+
+### Stop Real Data
+```
+stop_real_data
+# or via WebSocket:
+ws.send('stop_real_data');
+```
+
+---
+
+## 📊 Tank Configuration
+
+| Parameter | Value |
+|-----------|-------|
+| **Tank Height** | 55 ft (1676.4 cm) |
+| **Sensor Max Range** | ~400 cm (HC-SR04 limit) |
+| **Datum Range** | 0 - 1676.4 cm |
+| **Real Data Buffer** | 1000 points |
+
+---
+
 ## ✨ Features
 
+- **55ft (1676.4cm) tank** support
 - **Median filtering** (5 samples) for noise rejection
 - **Precise pulse measurement**: RMT hardware (ESP-IDF) / `pulseIn()` (Arduino)
 - **SSD1306 OLED** driver with custom 5x7 font
 - **Serial CLI** for calibration and monitoring
 - **Auto error detection** with display alerts
+- **6 Operation Modes**: Live, Sine, Square, Triangle, Sawtooth, Real Data
+- **1000-point real data buffer** for simulated water level playback
+- **WiFi Station** mode (Wokwi-GUEST)
+- **HTTP REST API** with 5 endpoints
+- **WebSocket server** for real-time streaming (100ms updates)
+- **Waveform simulation** for testing without water
 
 ---
 
@@ -121,10 +250,10 @@ water-level-monitor-esp32c6/
 ├── .gitignore
 ├── main/                          # ESP-IDF (ESP32-C6 real hardware)
 │   ├── CMakeLists.txt
-│   ├── main.c        # App entry point + CLI
-│   ├── sensor.h/.c   # HC-SR04 driver (RMT)
+│   ├── main.c        # App entry point + CLI + WiFi + WebServer + WebSocket
+│   ├── sensor.h/.c   # HC-SR04 driver (RMT) + simulation modes + real data buffer
 │   ├── display.h/.c  # SSD1306 driver (I2C)
-│   └── config.h      # Pin definitions & constants
+│   └── config.h      # Pin definitions, tank config, WiFi, operation modes
 └── wokwi/                          # Arduino (Wokwi simulation)
     ├── diagram.json  # Wokwi wiring diagram
     └── sketch.ino    # Arduino code
@@ -143,6 +272,11 @@ water-level-monitor-esp32c6/
 | **Display** | Custom I2C driver | Adafruit_SSD1306 lib |
 | **Voltage** | 3.3V logic (needs divider) | 5V logic (simulated) |
 | **Build** | `idf.py build` | Browser (Wokwi) |
+| **WiFi** | ✅ Station mode | ❌ |
+| **HTTP Server** | ✅ Port 80 | ❌ |
+| **WebSocket** | ✅ /ws | ❌ |
+| **Simulation Modes** | ✅ 6 modes | ❌ |
+| **Real Data Buffer** | ✅ 1000 pts | ❌ |
 
 ---
 
