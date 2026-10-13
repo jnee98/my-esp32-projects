@@ -20,12 +20,18 @@
 #define OLED_I2C_FREQ_HZ      400000
 
 // ============================================================
+// Tank Configuration
+// ============================================================
+#define TANK_HEIGHT_FT          55.0f
+#define TANK_HEIGHT_CM          (TANK_HEIGHT_FT * 30.48f)  // 1676.4 cm
+
+// ============================================================
 // Sensor Configuration
 // ============================================================
 #define ECHO_TIMEOUT_US       30000    // 30ms timeout (~5m range)
 #define NUM_SAMPLES           5        // Median filter samples
 #define MIN_VALID_DISTANCE_CM 2.0f
-#define MAX_VALID_DISTANCE_CM 400.0f
+#define MAX_VALID_DISTANCE_CM 400.0f   // HC-SR04 max range
 #define SAMPLE_DELAY_MS       80       // Between samples
 
 // ============================================================
@@ -43,6 +49,40 @@
 #define SENSOR_READ_INTERVAL_MS   100
 #define DISPLAY_UPDATE_MS         1000
 #define SERIAL_PRINT_MS           1000
+
+// ============================================================
+// WiFi Configuration (Station Mode - Wokwi AP doesn't work in browser)
+// ============================================================
+#define WIFI_SSID               "Wokwi-GUEST"
+#define WIFI_PASS               ""
+#define WIFI_MAX_RETRY          5
+
+// ============================================================
+// Real Data Simulation
+// ============================================================
+#define REAL_DATA_BUFFER_SIZE   1000
+#define REAL_DATA_INTERVAL_MS   100
+#define REAL_DATA_TOTAL_MS      (REAL_DATA_BUFFER_SIZE * REAL_DATA_INTERVAL_MS)  // 100 seconds
+#define REAL_DATA_MIN_CM        0.0f
+#define REAL_DATA_MAX_CM        TANK_HEIGHT_CM
+
+// ============================================================
+// Web Server
+// ============================================================
+#define WEB_SERVER_PORT         80
+#define WEBSOCKET_URI           "/ws"
+
+// ============================================================
+// Operation Modes
+// ============================================================
+typedef enum {
+    MODE_LIVE_SENSOR = 0,      // Live HC-SR04 readings
+    MODE_SINE_WAVE = 1,        // Sine wave simulation
+    MODE_SQUARE_WAVE = 2,      // Square wave simulation
+    MODE_TRIANGLE_WAVE = 3,    // Triangle wave simulation
+    MODE_SAWTOOTH_WAVE = 4,    // Sawtooth wave simulation
+    MODE_REAL_DATA = 5         // Real data replay (1000 points)
+} operation_mode_t;
 
 // ============================================================
 // RMT Configuration for precise pulse measurement
