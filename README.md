@@ -75,6 +75,63 @@ idf.py -p /dev/ttyUSB0 monitor
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
 
+### Build & Flash (Windows)
+
+**Option 1: ESP-IDF Command Prompt (Recommended)**
+
+1. Install ESP-IDF using the [official installer](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c6/get-started/windows-setup.html) (includes Python, Git, toolchain)
+2. Open **"ESP-IDF 5.x Command Prompt"** from Start Menu
+3. Navigate to project:
+   ```cmd
+   cd path\to\my-esp32-projects\main
+   ```
+4. Build and flash:
+   ```cmd
+   idf.py build
+   idf.py -p COM3 flash
+   idf.py -p COM3 monitor
+   ```
+
+**Option 2: PowerShell / Command Prompt**
+
+If you installed ESP-IDF manually:
+```powershell
+# Setup environment (run once per session)
+. $env:IDF_PATH\export.ps1
+# or for cmd.exe:
+%IDF_PATH%\export.bat
+
+# Then same commands:
+idf.py build
+idf.py -p COM3 flash monitor
+```
+
+**Option 3: VS Code + ESP-IDF Extension**
+
+1. Install [VS Code](https://code.visualstudio.com/)
+2. Install [Espressif IDF extension](https://marketplace.visualstudio.com/items?itemName=espressif.esp-idf-extension)
+3. Configure extension with your ESP-IDF path
+4. Open `main/` folder → Click "Build" → "Flash" → "Monitor" in status bar
+
+---
+
+### Finding Your COM Port (Windows)
+
+```cmd
+# List all COM ports
+mode
+
+# Or in PowerShell
+Get-CimInstance Win32_SerialPort | Select-Object Name, Description
+
+# Or use Device Manager → Ports (COM & LPT)
+# Look for: "USB Serial Device (COM3)" or "Silicon Labs CP210x (COM3)"
+```
+
+**Typical ports:**
+- ESP32-C6 DevKitC-1: `COM3` - `COM10`
+- Replace `COM3` in commands above with your actual port
+
 ---
 
 ## 📋 Serial Commands (ESP-IDF Version)
